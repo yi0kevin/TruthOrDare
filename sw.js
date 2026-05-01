@@ -1,4 +1,4 @@
-const CACHE = 'truthordare-v1';
+const CACHE = 'truthordare-v2';
 const FILES = ['/', '/index.html', '/data.js', '/app.js', '/manifest.json'];
 
 self.addEventListener('install', (e) => {
