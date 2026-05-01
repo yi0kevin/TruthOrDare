@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#6BAAD7">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <title>真心话大冒险</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg: #6BAAD7;
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'PingFang SC', 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            background: var(--bg);
+            transition: background 0.6s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+        }
+
+        /* ---- Text card ---- */
+        .text-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 400px;
+            padding-top: 40px;
+            gap: 14px;
+        }
+
+        .text-card {
+            width: 100%;
+            max-height: 260px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            text-align: center;
+            padding: 28px 24px;
+            color: #fff;
+            font-size: 21px;
+            font-weight: 500;
+            line-height: 1.7;
+            letter-spacing: 0.02em;
+            transition: opacity 0.25s ease;
+        }
+
+        .text-card.fade { opacity: 0; }
+
+        .text-card::-webkit-scrollbar { width: 0; }
+
+        /* ---- Answer reveal (turtle soup) ---- */
+        .answer-area {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .answer-btn {
+            display: inline-block;
+            padding: 10px 22px;
+            color: rgba(255,255,255,0.65);
+            font-size: 14px;
+            font-weight: 500;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .answer-btn:active { opacity: 0.7; }
+
+        .answer-text {
+            display: block;
+            padding: 16px 18px;
+            color: #fff;
+            font-size: 15px;
+            line-height: 1.6;
+            background: rgba(255,255,255,0.18);
+            border-radius: 14px;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+
+        /* ---- Circle button ---- */
+        .btn-wrap {
+            flex-shrink: 0;
+            padding: 20px 0;
+        }
+
+        .circle-btn {
+            position: relative;
+            width: 148px; height: 148px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            outline: none;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .circle-btn.pressed { transform: scale(0.87); }
+
+        .circle-btn .ring    { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(255,255,255,0.25); }
+        .circle-btn .middle  { position: absolute; inset: 8px; border-radius: 50%; background: rgba(255,255,255,0.12); }
+        .circle-btn .inner   {
+            position: absolute; inset: 19px; border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .circle-btn .icon    { font-size: 38px; line-height: 1; }
+
+        /* ---- Type selector ---- */
+        .type-row {
+            flex-shrink: 0;
+            display: flex;
+            gap: 10px;
+            padding-bottom: calc(28px + var(--safe-bottom));
+            width: 100%;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .type-btn {
+            padding: 11px 22px;
+            border: none;
+            border-radius: 22px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            color: rgba(255,255,255,0.85);
+            background: rgba(255,255,255,0.12);
+            white-space: nowrap;
+        }
+        .type-btn.active {
+            color: var(--bg);
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="text-area" id="textArea">
+        <div class="text-card" id="textCard">点击按钮<br>随机生成真心话问题</div>
+        <div class="answer-area" id="answerArea"></div>
+    </div>
+
+    <div class="btn-wrap">
+        <button class="circle-btn" id="circleBtn">
+            <div class="ring"></div>
+            <div class="middle"></div>
+            <div class="inner"><span class="icon" id="btnIcon">💬</span></div>
+        </button>
+    </div>
+
+    <div class="type-row" id="typeRow">
+        <button class="type-btn active" data-type="truth">真心话</button>
+        <button class="type-btn" data-type="dare">大冒险</button>
+        <button class="type-btn" data-type="turtleSoup">海龟汤</button>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+    </script>
+</body>
+</html>
